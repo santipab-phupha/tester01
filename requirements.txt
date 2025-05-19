@@ -1,4 +1,1 @@
-pandas
 google-generativeai
-re
-json
