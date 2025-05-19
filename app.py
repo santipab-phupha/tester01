@@ -75,7 +75,6 @@ if page == "Generate Questions":
     st.title("🧠 Generate Survey Questions")
 
     if not os.path.exists(Q_FILE):
-        st.error("❌ ไม่พบไฟล์ `question.txt` กรุณาอัปโหลดไฟล์นี้ไปยังไดเรกทอรีของแอปก่อน Deploy")
         st.stop()
 
     user_summary = st.text_area(
@@ -139,7 +138,6 @@ if page == "Generate Questions":
                 st.success("✅ อัปเดต `question.txt` เรียบร้อยแล้ว!")
                 st.experimental_rerun()
             except Exception:
-                st.error("❌ ไม่สามารถแปลงผลลัพธ์เป็น JSON ได้")
                 st.code(raw, language="json")
 
 # ==== PAGE: ANSWER POLL ====
