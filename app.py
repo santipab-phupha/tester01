@@ -11,7 +11,7 @@ genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 # Use the files you’ve already provisioned in the app directory
-Q_FILE = os.path.join(os.getcwd(), "question.json")
+Q_FILE = os.path.join(os.getcwd(), "question.txt")    # now a .txt file
 DB_FILE = os.path.join(os.getcwd(), "database.csv")
 
 # ==== AI / JSON UTILS ====
@@ -75,7 +75,7 @@ if page == "Generate Questions":
     st.title("🧠 Generate Survey Questions")
 
     if not os.path.exists(Q_FILE):
-        st.error("❌ ไม่พบไฟล์ `question.json` กรุณาอัปโหลดไฟล์นี้ไปยังไดเรกทอรีของแอปก่อน Deploy")
+        st.error("❌ ไม่พบไฟล์ `question.txt` กรุณาอัปโหลดไฟล์นี้ไปยังไดเรกทอรีของแอปก่อน Deploy")
         st.stop()
 
     user_summary = st.text_area(
@@ -131,12 +131,12 @@ if page == "Generate Questions":
             cleaned = extract_json_array(raw)
             try:
                 qlist = json.loads(cleaned)
-                # overwrite the existing question.json
+                # overwrite the existing question.txt
                 with open(Q_FILE, "r+", encoding="utf-8") as f:
                     f.seek(0)
                     f.truncate()
                     json.dump(qlist, f, ensure_ascii=False, indent=2)
-                st.success("✅ อัปเดต `question.json` เรียบร้อยแล้ว!")
+                st.success("✅ อัปเดต `question.txt` เรียบร้อยแล้ว!")
                 st.experimental_rerun()
             except Exception:
                 st.error("❌ ไม่สามารถแปลงผลลัพธ์เป็น JSON ได้")
@@ -152,10 +152,10 @@ elif page == "Answer Poll":
 
     questions, load_error = load_questions()
     if load_error:
-        st.error(f"❌ โหลด `question.json` ผิดพลาด: {load_error}")
+        st.error(f"❌ โหลด `question.txt` ผิดพลาด: {load_error}")
         st.stop()
     if questions is None:
-        st.warning("ยังไม่มีคำถามใน `question.json`")
+        st.warning("ยังไม่มีคำถามใน `question.txt`")
         st.stop()
 
     # show existing responses
@@ -196,8 +196,10 @@ elif page == "Answer Poll":
 
     if submitted:
         df_db = pd.read_csv(DB_FILE)
-        row = {q["id"]: (";".join(answers[q["id"]]) if isinstance(answers[q["id"]], list) else answers[q["id"]])
-               for q in questions}
+        row = {
+            q["id"]: (";".join(answers[q["id"]]) if isinstance(answers[q["id"]], list) else answers[q["id"]])
+            for q in questions
+        }
         df_db = pd.concat([df_db, pd.DataFrame([row])], ignore_index=True)
         # overwrite the existing CSV without creating a new file
         with open(DB_FILE, "r+", encoding="utf-8") as f:
@@ -216,7 +218,9 @@ elif page == "Check Bias":
 2. คุณพอใจกับรูปร่างของคุณแค่ไหน?
 3. ถ้าคุณรักสุขภาพจริง คุณจะใช้แก้วน้ำอัจฉริยะหรือไม่?
 4. รายได้ของคุณต่ำกว่า 15,000 บาท ใช่หรือไม่?"""
-    questions_text = uploaded.read().decode("utf-8") if uploaded else st.text_area("หรือกรอกเอง", height=200, value=default)
+    questions_text = (
+        uploaded.read().decode("utf-8") if uploaded else st.text_area("หรือกรอกเอง", height=200, value=default)
+    )
     if st.button("🔍 ตรวจสอบ Bias"):
         if "user_summary_default" not in st.session_state:
             st.warning("⚠️ กรุณาสร้างคำถามก่อนในหน้า Generate Questions")
@@ -240,7 +244,9 @@ elif page == "Fix Survey":
 2. คุณพอใจกับรูปร่างของคุณแค่ไหน?
 3. ถ้าคุณรักสุขภาพจริง คุณจะใช้แก้วน้ำอัจฉริยะหรือไม่?
 4. รายได้ของคุณต่ำกว่า 15,000 บาท ใช่หรือไม่?"""
-    questions_text = uploaded.read().decode("utf-8") if uploaded else st.text_area("แบบสอบถามเดิม", height=200, value=default, key="fix_text")
+    questions_text = (
+        uploaded.read().decode("utf-8") if uploaded else st.text_area("แบบสอบถามเดิม", height=200, value=default, key="fix_text")
+    )
     if st.button("🧠 ปรับปรุงแบบสอบถาม"):
         if "user_summary_default" not in st.session_state:
             st.warning("⚠️ กรุณาสร้างคำถามก่อนในหน้า Generate Questions")
@@ -283,12 +289,12 @@ elif page == "Fix Survey":
 elif page == "Re-Check":
     st.title("🔍 Re-Check ความเหมาะสมของแบบสอบถาม")
     if not os.path.exists(Q_FILE):
-        st.error("❌ ไม่พบ `question.json` กรุณาอัปโหลดก่อน")
+        st.error("❌ ไม่พบ `question.txt` กรุณาอัปโหลดก่อน")
         st.stop()
     try:
         question_data = json.load(open(Q_FILE, encoding="utf-8"))
     except Exception as e:
-        st.error("❌ อ่าน `question.json` ผิดพลาด")
+        st.error("❌ อ่าน `question.txt` ผิดพลาด")
         st.exception(e)
         st.stop()
 
